@@ -1,1 +1,17 @@
+jwt:
+  secret: ${JWT_SECRET:nZr4t7w!z%C*F-JaNdRgUkXp2s5v8x/A?D(G+KbPeShVmYq3t6w9z$B&E)H@McQf}
+  expiration: ${JWT_EXPIRATION:86400000}
+  signatureAlgorithm: ${JWT_SIGNATURE_ALGORITHM:HS512}
+  serviceAuthorisationHeaderName: ${JWT_SERVICE_AUTH_HEADER_NAME:ServiceAuthorization}
+  userAuthorisationHeaderName: ${JWT_USER_AUTH_HEADER_NAME:UserAuthorisation}
 
+security:
+  anonymousPaths:
+    - "/"
+    - "/auth/**"
+    - "/auth/authenticate"
+    - "/health/**"
+    - "/swagger-ui.html"
+    - "/swagger-ui/**"
+    - "/v3/api-docs/**"
+    - "/favicon.ico"

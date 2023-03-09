@@ -3,6 +3,7 @@ package uk.twl.authtest.security.provider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -14,8 +15,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
@@ -24,45 +25,54 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class MpTokenProvider {
+public class ServiceAuthProvider {
+    public static final String AUTH_PROVIDER = "authProvider";
+    public static final String TERMS_ACCEPTED = "termsAccepted";
+    public static final String USER_ID = "userId";
+    private final JwtParser jwtParser;
+    private final JwtBuilder jwtBuilder;
 
     @Value("${jwt.expiration}")
-    private int jwtExpiration;
-
-    @Value("${jwt.signatureAlgorithm}")
-    private SignatureAlgorithm signatureAlgorithm;
+    private final int jwtExpiration;
 
     @Value("${jwt.serviceAuthorisationHeaderName}")
     private final String serviceAuthorisationHeaderName;
 
-
-    private final Key key;
-    private final JwtParser jwtParser;
-
-    public Map<String, String> generateToken(UUID userId, boolean termsAccepted, MpAuthProvider mpAuthProvider) {
+    public String generateToken(UUID userId, boolean termsAccepted, MpAuthProviderMap authProviderMap) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
 
-        String jwt = Jwts.builder()
+        return jwtBuilder
             .setId(UUID.randomUUID().toString())
             .setIssuedAt(now)
             .setExpiration(expiryDate)
-            .claim("userId", userId)
-            .claim("termsAccepted", termsAccepted)
-            .claim("authProvider", mpAuthProvider)
-            .signWith(key, signatureAlgorithm)
+            .claim(USER_ID, userId)
+            .claim(TERMS_ACCEPTED, termsAccepted)
+            .claim(AUTH_PROVIDER, authProviderMap)
             .compact();
+    }
 
-        return Map.of(serviceAuthorisationHeaderName, "Bearer " + jwt);
+    public String generateBearerToken(UUID userId, boolean termsAccepted, MpAuthProviderMap authProviderMap) {
+        return "Bearer " + generateToken(userId, termsAccepted, authProviderMap);
     }
 
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = getClaimsJws(token);
             String id = claims.getBody().getId();
-            String userId = claims.getBody().get("userId", String.class);
-            MpAuthProvider mpAuthProvider = claims.getBody().get("authProvider", MpAuthProvider.class);
-            return !(isEmpty(id) || isEmpty(userId) || isNull(mpAuthProvider));
+            String userId = claims.getBody().get(USER_ID, String.class);
+            String authProviderMapName = claims.getBody().get(AUTH_PROVIDER, String.class);
+            MpAuthProviderMap authProviderMap = MpAuthProviderMap.getAuthProviderMap(authProviderMapName);
+            if (isEmpty(id) || isEmpty(userId) || isNull(authProviderMap)) {
+                log.error("Blank or Invalid claims in JWT token");
+                return false;
+            }
+            if (!authProviderMap.isEnabled()) {
+                log.error("authProvider {} is not enabled", authProviderMap);
+                return false;
+            }
+
+            return true;
         } catch (MalformedJwtException ex) {
             log.error("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
@@ -77,5 +87,9 @@ public class MpTokenProvider {
 
     public Jws<Claims> getClaimsJws(String token) {
         return jwtParser.parseClaimsJws(token);
+    }
+
+    public String getHeaderName() {
+        return serviceAuthorisationHeaderName;
     }
 }

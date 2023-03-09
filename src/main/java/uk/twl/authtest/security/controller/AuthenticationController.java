@@ -1,40 +1,58 @@
 package uk.twl.authtest.security.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import uk.twl.authtest.security.controller.request.JwtRequest;
-import uk.twl.authtest.security.controller.request.JwtResponse;
-import uk.twl.authtest.security.provider.MpAuthProvider;
-import uk.twl.authtest.security.provider.MpTokenProvider;
+import uk.twl.authtest.security.controller.request.AuthenticationRequest;
+import uk.twl.authtest.security.provider.AuthProvider;
+import uk.twl.authtest.security.provider.KcAuthProvider;
+import uk.twl.authtest.security.provider.MpAuthProviderMap;
+import uk.twl.authtest.security.provider.ServiceAuthProvider;
+import uk.twl.authtest.security.service.MpAuthProviderMapService;
 
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-public class JwtAuthenticationController {
-    private final MpTokenProvider mpTokenProvider;
+@Slf4j
+public class AuthenticationController {
 
-    @PostMapping(value = "/authenticate")
-    public ResponseEntity<JwtResponse> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+    private final MpAuthProviderMapService authProviderMapService;
+    private final ServiceAuthProvider serviceAuthProvider;
+
+    @PostMapping(value = "/auth/authenticate")
+    public ResponseEntity createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) {
 
         String username = authenticationRequest.getUsername();
         String password = authenticationRequest.getPassword();
-        MpAuthProvider authProvider = authenticationRequest.getMpAuthProvider();
-        Map<String, String> authProviderHeader  = authProvider.authenticate(username, password);
-        UUID userId  = authProvider.getUserId(authProviderHeader);
+        MpAuthProviderMap authProviderMap = authenticationRequest.getAuthProvider();
 
+        AuthProvider authProvider = authProviderMapService.getAuthProvider(authProviderMap);
 
-        final Map<String, String> serviceHeader = mpTokenProvider.generateToken(userId, false, authProvider);
+        if (!authProviderMap.isEnabled()) {
+            log.error("authProvider {} is not enabled", authProviderMap);
+            throw new RuntimeException("authProvider is not enabled");
+        }
 
-        JwtResponse jwtResponse = JwtResponse.builder()
-            .serviceHeader(serviceHeader)
-            .authProviderHeader(authProviderHeader)
-            .build();
+        MultiValueMap<String, String> authProviderHeaders  = authProvider.authenticate(username, password);
+        UUID userId  = authProvider.getUserId(authProviderHeaders);
 
-        return ResponseEntity.ok(jwtResponse);
+        HttpHeaders responseHeaders = new HttpHeaders();
+
+        responseHeaders.addAll(new LinkedMultiValueMap<>(authProviderHeaders));
+
+        final String serviceHeaderValue = serviceAuthProvider.generateBearerToken(userId, false, authProviderMap);
+        final String serviceHeaderName = serviceAuthProvider.getHeaderName();
+
+        responseHeaders.put(serviceHeaderName, List.of(serviceHeaderValue));
+
+        return ResponseEntity.ok().headers(responseHeaders).build();
     }
 }

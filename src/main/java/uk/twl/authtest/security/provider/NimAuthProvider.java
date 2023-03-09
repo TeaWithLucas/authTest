@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NimAuthProvider implements MpAuthProvider {
+public class NimAuthProvider implements AuthProvider {
 
     @Override
     public String getName() {

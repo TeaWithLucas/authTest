@@ -1,13 +1,22 @@
-package uk.twl.authtest.security.provider;
+package uk.twl.authtest.security.service;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import uk.twl.authtest.security.provider.AuthProvider;
+import uk.twl.authtest.security.provider.KcAuthProvider;
+import uk.twl.authtest.security.provider.MpAuthProviderMap;
 
-@Getter
+import java.util.List;
+
+@Service
 @RequiredArgsConstructor
-public enum MpAuthProviderMap {
-    KC_AUTH_PROVIDER(KcAuthProvider.class),
-    NIM_AUTH_PROVIDER(NimAuthProvider.class);
+public class MpAuthProviderMapService {
+    private final List<KcAuthProvider> list;
 
-    private final Class<? extends AuthProvider> authProvider;
+    public AuthProvider getAuthProvider(MpAuthProviderMap authProviderMap) {
+        return list.stream()
+                .filter(authProvider -> authProvider.getClass().equals(authProviderMap.getAuthProvider()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("AuthProvider not found"));
+    }
 }

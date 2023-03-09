@@ -19,7 +19,7 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class KcAuthProvider implements MpAuthProvider {
+public class KcAuthProvider implements AuthProvider {
 
     @Value("${jwt.userAuthorisationHeaderName}")
     private final String userAuthorisationHeaderName;
