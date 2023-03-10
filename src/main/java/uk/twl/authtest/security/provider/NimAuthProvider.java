@@ -1,14 +1,13 @@
 package uk.twl.authtest.security.provider;
 
+import java.util.Map;
+import java.util.UUID;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import java.util.Map;
-import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
 
 @Component
 @RequiredArgsConstructor

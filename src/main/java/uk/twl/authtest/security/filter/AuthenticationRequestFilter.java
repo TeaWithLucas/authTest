@@ -1,8 +1,20 @@
 package uk.twl.authtest.security.filter;
 
 
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static uk.twl.authtest.security.provider.ServiceAuthProvider.AUTH_PROVIDER;
+import static uk.twl.authtest.security.provider.ServiceAuthProvider.USER_ID;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -13,19 +25,6 @@ import uk.twl.authtest.security.provider.AuthProvider;
 import uk.twl.authtest.security.provider.MpAuthProviderMap;
 import uk.twl.authtest.security.provider.ServiceAuthProvider;
 import uk.twl.authtest.security.service.MpAuthProviderMapService;
-
-import java.io.IOException;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static uk.twl.authtest.security.provider.ServiceAuthProvider.AUTH_PROVIDER;
-import static uk.twl.authtest.security.provider.ServiceAuthProvider.USER_ID;
 
 @RequiredArgsConstructor
 public class AuthenticationRequestFilter extends OncePerRequestFilter {

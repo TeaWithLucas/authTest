@@ -1,5 +1,7 @@
 package uk.twl.authtest.security.controller;
 
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -11,13 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.twl.authtest.security.controller.request.AuthenticationRequest;
 import uk.twl.authtest.security.provider.AuthProvider;
-import uk.twl.authtest.security.provider.KcAuthProvider;
 import uk.twl.authtest.security.provider.MpAuthProviderMap;
 import uk.twl.authtest.security.provider.ServiceAuthProvider;
 import uk.twl.authtest.security.service.MpAuthProviderMapService;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
