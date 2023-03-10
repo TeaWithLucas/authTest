@@ -12,9 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @ConfigurationProperties(prefix = "security")
 @Data
 public class SecurityProperties {
-    private final List<String> anonymousPaths = new ArrayList<>();
+  private final List<String> anonymousPaths = new ArrayList<>();
 
-    public String[] getAnonymousPathsArray() {
-        return anonymousPaths.toArray(String[]::new);
-    }
+  public String[] getAnonymousPathsArray() {
+    return anonymousPaths.toArray(String[]::new);
+  }
 }

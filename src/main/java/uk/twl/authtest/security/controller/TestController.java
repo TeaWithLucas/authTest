@@ -9,11 +9,11 @@ import uk.twl.authtest.security.provider.ServiceAuthProvider;
 @RestController
 @RequiredArgsConstructor
 public class TestController {
-    private final ServiceAuthProvider serviceAuthProvider;
+  private final ServiceAuthProvider serviceAuthProvider;
 
-    @GetMapping(value = "/test")
-    public ResponseEntity<String> createAuthenticationToken() {
+  @GetMapping(value = "/test")
+  public ResponseEntity<String> createAuthenticationToken() {
 
-        return ResponseEntity.ok("test");
-    }
+    return ResponseEntity.ok("test");
+  }
 }

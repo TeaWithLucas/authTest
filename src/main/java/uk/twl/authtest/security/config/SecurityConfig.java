@@ -19,33 +19,33 @@ import uk.twl.authtest.security.service.MpAuthProviderMapService;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final SecurityProperties securityProperties;
+  private final SecurityProperties securityProperties;
 
-    private final ServiceAuthProvider serviceAuthProvider;
-    @Qualifier("serviceBearerTokenResolver")
-    public final BearerTokenResolver serviceBearerTokenResolver;
+  private final ServiceAuthProvider serviceAuthProvider;
+  @Qualifier("serviceBearerTokenResolver")
+  public final BearerTokenResolver serviceBearerTokenResolver;
 
-    private final MpAuthProviderMapService authProviderMapService;
+  private final MpAuthProviderMapService authProviderMapService;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .addFilterBefore(getAuthenticationRequestFilter(), BearerTokenAuthenticationFilter.class)
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .httpBasic().disable()
-            .formLogin().disable()
-            .logout().disable()
-            .csrf().disable();
-        return http.build();
-    }
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .addFilterBefore(getAuthenticationRequestFilter(), BearerTokenAuthenticationFilter.class)
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+        .httpBasic().disable()
+        .formLogin().disable()
+        .logout().disable()
+        .csrf().disable();
+    return http.build();
+  }
 
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().antMatchers(securityProperties.getAnonymousPathsArray());
-    }
+  @Bean
+  public WebSecurityCustomizer webSecurityCustomizer() {
+    return web -> web.ignoring().antMatchers(securityProperties.getAnonymousPathsArray());
+  }
 
-    private AuthenticationRequestFilter getAuthenticationRequestFilter() {
-        return new AuthenticationRequestFilter(serviceAuthProvider, serviceBearerTokenResolver, authProviderMapService);
-    }
+  private AuthenticationRequestFilter getAuthenticationRequestFilter() {
+    return new AuthenticationRequestFilter(serviceAuthProvider, serviceBearerTokenResolver, authProviderMapService);
+  }
 }

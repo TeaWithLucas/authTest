@@ -19,48 +19,48 @@ import org.springframework.security.oauth2.server.resource.web.DefaultBearerToke
 @RequiredArgsConstructor
 public class JwtConfig {
 
-    @Value("${jwt.secret}")
-    private final String jwtSecret;
-    @Value("${jwt.signatureAlgorithm}")
-    private SignatureAlgorithm signatureAlgorithm;
-    @Value("${jwt.serviceAuthorisationHeaderName}")
-    private final String serviceAuthorisationHeaderName;
-    @Value("${jwt.userAuthorisationHeaderName}")
-    private final String userAuthorisationHeaderName;
+  @Value("${jwt.secret}")
+  private final String jwtSecret;
+  @Value("${jwt.signatureAlgorithm}")
+  private SignatureAlgorithm signatureAlgorithm;
+  @Value("${jwt.serviceAuthorisationHeaderName}")
+  private final String serviceAuthorisationHeaderName;
+  @Value("${jwt.userAuthorisationHeaderName}")
+  private final String userAuthorisationHeaderName;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Bean
-    public Key jwtKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
-    }
+  @Bean
+  public Key jwtKey() {
+    return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+  }
 
-    @Bean
-    public JwtBuilder jwtBuilder(Key jwtKey) {
-        return Jwts.builder()
-            .signWith(jwtKey, signatureAlgorithm)
-            .serializeToJsonWith(new JacksonSerializer<>(objectMapper));
-    }
+  @Bean
+  public JwtBuilder jwtBuilder(Key jwtKey) {
+    return Jwts.builder()
+        .signWith(jwtKey, signatureAlgorithm)
+        .serializeToJsonWith(new JacksonSerializer<>(objectMapper));
+  }
 
-    @Bean
-    public JwtParser jwtParser(Key jwtKey) {
-        return Jwts.parserBuilder()
-            .setSigningKey(jwtKey)
-            .deserializeJsonWith(new JacksonDeserializer<>(objectMapper))
-            .build();
-    }
+  @Bean
+  public JwtParser jwtParser(Key jwtKey) {
+    return Jwts.parserBuilder()
+        .setSigningKey(jwtKey)
+        .deserializeJsonWith(new JacksonDeserializer<>(objectMapper))
+        .build();
+  }
 
-    @Bean("serviceBearerTokenResolver")
-    public DefaultBearerTokenResolver serviceBearerTokenResolver() {
-        DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
-        resolver.setBearerTokenHeaderName(serviceAuthorisationHeaderName);
-        return resolver;
-    }
+  @Bean("serviceBearerTokenResolver")
+  public DefaultBearerTokenResolver serviceBearerTokenResolver() {
+    DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
+    resolver.setBearerTokenHeaderName(serviceAuthorisationHeaderName);
+    return resolver;
+  }
 
-    @Bean("userBearerTokenResolver")
-    public DefaultBearerTokenResolver userBearerTokenResolver() {
-        DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
-        resolver.setBearerTokenHeaderName(userAuthorisationHeaderName);
-        return resolver;
-    }
+  @Bean("userBearerTokenResolver")
+  public DefaultBearerTokenResolver userBearerTokenResolver() {
+    DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
+    resolver.setBearerTokenHeaderName(userAuthorisationHeaderName);
+    return resolver;
+  }
 }

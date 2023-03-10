@@ -28,53 +28,53 @@ import uk.twl.authtest.security.service.MpAuthProviderMapService;
 
 @RequiredArgsConstructor
 public class AuthenticationRequestFilter extends OncePerRequestFilter {
-    private final ServiceAuthProvider serviceAuthProvider;
+  private final ServiceAuthProvider serviceAuthProvider;
 
-    public final BearerTokenResolver serviceBearerTokenResolver;
+  public final BearerTokenResolver serviceBearerTokenResolver;
 
-    private final MpAuthProviderMapService authProviderMapService;
+  private final MpAuthProviderMapService authProviderMapService;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-        throws ServletException, IOException {
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws ServletException, IOException {
 
-        final String serviceAuthorisationToken = serviceBearerTokenResolver.resolve(request);
+    final String serviceAuthorisationToken = serviceBearerTokenResolver.resolve(request);
 
-        if (!serviceAuthProvider.validateToken(serviceAuthorisationToken)) {
-            logger.error("JWT Token is not valid");
-            response.setStatus(UNAUTHORIZED.value());
-            return;
-        }
-
-        Jws<Claims> claimsJws = serviceAuthProvider.getClaimsJws(serviceAuthorisationToken);
-
-        String authProviderMapString = claimsJws.getBody().get(AUTH_PROVIDER, String.class);
-        MpAuthProviderMap authProviderMap = MpAuthProviderMap.getAuthProviderMap(authProviderMapString);
-
-        AuthProvider authProvider = authProviderMapService.getAuthProvider(authProviderMap);
-
-        Instant issuedAt = claimsJws.getBody().getIssuedAt().toInstant();
-        Instant expiresAt = claimsJws.getBody().getExpiration().toInstant();
-
-        if(!authProvider.authenticate(request)) {
-            logger.error("authProvider failed to authenticate");
-            response.setStatus(UNAUTHORIZED.value());
-            return;
-        }
-
-        Jwt jwt = new Jwt(serviceAuthorisationToken, issuedAt,
-            expiresAt, claimsJws.getHeader(), claimsJws.getBody());
-
-        JwtAuthenticationToken jwtAuthenticationToken = new JwtAuthenticationToken(jwt, List.of());
-
-        SecurityContextHolder.getContext().setAuthentication(jwtAuthenticationToken);
-
-        UUID userId = UUID.fromString(claimsJws.getBody().get(USER_ID, String.class));
-        String serviceHeaderValue = serviceAuthProvider.generateBearerToken(userId, false, authProviderMap);
-        String serviceHeaderName = serviceAuthProvider.getHeaderName();
-
-        response.setHeader(serviceHeaderName, serviceHeaderValue);
-
-        chain.doFilter(request, response);
+    if (!serviceAuthProvider.validateToken(serviceAuthorisationToken)) {
+      logger.error("JWT Token is not valid");
+      response.setStatus(UNAUTHORIZED.value());
+      return;
     }
+
+    Jws<Claims> claimsJws = serviceAuthProvider.getClaimsJws(serviceAuthorisationToken);
+
+    String authProviderMapString = claimsJws.getBody().get(AUTH_PROVIDER, String.class);
+    MpAuthProviderMap authProviderMap = MpAuthProviderMap.getAuthProviderMap(authProviderMapString);
+
+    AuthProvider authProvider = authProviderMapService.getAuthProvider(authProviderMap);
+
+    Instant issuedAt = claimsJws.getBody().getIssuedAt().toInstant();
+    Instant expiresAt = claimsJws.getBody().getExpiration().toInstant();
+
+    if (!authProvider.authenticate(request)) {
+      logger.error("authProvider failed to authenticate");
+      response.setStatus(UNAUTHORIZED.value());
+      return;
+    }
+
+    Jwt jwt = new Jwt(serviceAuthorisationToken, issuedAt,
+        expiresAt, claimsJws.getHeader(), claimsJws.getBody());
+
+    JwtAuthenticationToken jwtAuthenticationToken = new JwtAuthenticationToken(jwt, List.of());
+
+    SecurityContextHolder.getContext().setAuthentication(jwtAuthenticationToken);
+
+    UUID userId = UUID.fromString(claimsJws.getBody().get(USER_ID, String.class));
+    String serviceHeaderValue = serviceAuthProvider.generateBearerToken(userId, false, authProviderMap);
+    String serviceHeaderName = serviceAuthProvider.getHeaderName();
+
+    response.setHeader(serviceHeaderName, serviceHeaderValue);
+
+    chain.doFilter(request, response);
+  }
 }
