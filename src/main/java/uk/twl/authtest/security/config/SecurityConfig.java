@@ -15,18 +15,33 @@ import uk.twl.authtest.security.filter.AuthenticationRequestFilter;
 import uk.twl.authtest.security.provider.ServiceAuthProvider;
 import uk.twl.authtest.security.service.MpAuthProviderMapService;
 
+/**
+ This class provides the security configuration for the application.
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+  /** The security properties */
   private final SecurityProperties securityProperties;
 
+  /** The authentication provider */
   private final ServiceAuthProvider serviceAuthProvider;
+
+  /** The Bearer token resolver */
   @Qualifier("serviceBearerTokenResolver")
   public final BearerTokenResolver serviceBearerTokenResolver;
 
+  /** The authentication provider map service */
   private final MpAuthProviderMapService authProviderMapService;
 
+  /**
+
+   Configures the security filter chain for the application.
+   @param http the HTTP security object
+   @return the security filter chain
+   @throws Exception if there is an error configuring the security filter chain
+   */
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
@@ -40,11 +55,24 @@ public class SecurityConfig {
     return http.build();
   }
 
+  /**
+   Returns the web security customizer for the application.
+   
+   This method defines the list of endpoints that do not require authentication,
+   known as anonymous paths.
+
+   @return the web security customizer
+   */
   @Bean
   public WebSecurityCustomizer webSecurityCustomizer() {
     return web -> web.ignoring().antMatchers(securityProperties.getAnonymousPathsArray());
   }
 
+  /**
+
+   Returns the authentication request filter.
+   @return the authentication request filter
+   */
   private AuthenticationRequestFilter getAuthenticationRequestFilter() {
     return new AuthenticationRequestFilter(serviceAuthProvider, serviceBearerTokenResolver, authProviderMapService);
   }
