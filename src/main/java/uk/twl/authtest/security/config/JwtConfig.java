@@ -15,26 +15,48 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 
+/**
+ This class provides configuration for JSON Web Tokens (JWTs) used in the application's security.
+ */
 @Configuration
 @RequiredArgsConstructor
 public class JwtConfig {
 
+  /** The JWT secret */
   @Value("${jwt.secret}")
   private final String jwtSecret;
+
+  /** The JWT signature algorithm */
   @Value("${jwt.signatureAlgorithm}")
   private SignatureAlgorithm signatureAlgorithm;
+
+  /** The service authorisation header name */
   @Value("${jwt.serviceAuthorisationHeaderName}")
   private final String serviceAuthorisationHeaderName;
+
+  /** The user authorisation header name */
   @Value("${jwt.userAuthorisationHeaderName}")
   private final String userAuthorisationHeaderName;
 
+  /** The object mapper */
   private final ObjectMapper objectMapper = new ObjectMapper();
 
+  /**
+   Returns the JWT secret key.
+   
+   @return the JWT secret key
+   */
   @Bean
   public Key jwtKey() {
     return Keys.hmacShaKeyFor(jwtSecret.getBytes());
   }
 
+  /**
+   Returns the JWT builder.
+
+   @param jwtKey the JWT secret key
+   @return the JWT builder
+   */
   @Bean
   public JwtBuilder jwtBuilder(Key jwtKey) {
     return Jwts.builder()
@@ -42,6 +64,12 @@ public class JwtConfig {
         .serializeToJsonWith(new JacksonSerializer<>(objectMapper));
   }
 
+  /**
+   Returns the JWT parser.
+
+   @param jwtKey the JWT secret key
+   @return the JWT parser
+   */
   @Bean
   public JwtParser jwtParser(Key jwtKey) {
     return Jwts.parserBuilder()
@@ -50,6 +78,11 @@ public class JwtConfig {
         .build();
   }
 
+  /**
+   Returns the service bearer token resolver.
+
+   @return the service bearer token resolver
+   */
   @Bean("serviceBearerTokenResolver")
   public DefaultBearerTokenResolver serviceBearerTokenResolver() {
     DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
@@ -57,6 +90,11 @@ public class JwtConfig {
     return resolver;
   }
 
+  /**
+   Returns the user bearer token resolver.
+
+   @return the user bearer token resolver
+   */
   @Bean("userBearerTokenResolver")
   public DefaultBearerTokenResolver userBearerTokenResolver() {
     DefaultBearerTokenResolver resolver = new DefaultBearerTokenResolver();
