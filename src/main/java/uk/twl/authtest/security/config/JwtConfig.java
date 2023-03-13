@@ -16,7 +16,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 
 /**
- This class provides configuration for JSON Web Tokens (JWTs) used in the application's security.
+
+ Configuration class for JWT (JSON Web Token) related beans and settings. This class provides beans for creating,
+ parsing and validating JWT tokens. It also provides beans for configuring bearer token resolvers for service and user
+ authorizations.
  */
 @Configuration
 @RequiredArgsConstructor
@@ -92,7 +95,7 @@ public class JwtConfig {
 
   /**
    Creates a bearer token resolver for user authorizations using the configured header name.
-   
+
    @return the bearer token resolver instance for user authorizations.
    */
   @Bean("userBearerTokenResolver")
