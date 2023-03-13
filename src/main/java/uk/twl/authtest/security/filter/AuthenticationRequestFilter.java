@@ -26,14 +26,28 @@ import uk.twl.authtest.security.provider.MpAuthProviderMap;
 import uk.twl.authtest.security.provider.ServiceAuthProvider;
 import uk.twl.authtest.security.service.MpAuthProviderMapService;
 
+/**
+ This class implements a filter that handles authentication requests for services using JWT tokens.
+ */
 @RequiredArgsConstructor
 public class AuthenticationRequestFilter extends OncePerRequestFilter {
   private final ServiceAuthProvider serviceAuthProvider;
 
+  /** The resolver for resolving Bearer tokens */
   public final BearerTokenResolver serviceBearerTokenResolver;
 
+  /** The service for getting authentication provider maps */
   private final MpAuthProviderMapService authProviderMapService;
 
+  /**
+
+   Filters the incoming HTTP request.
+   @param request the incoming HTTP request
+   @param response the HTTP response to send
+   @param chain the filter chain to use
+   @throws ServletException if the request cannot be handled
+   @throws IOException if an I/O error occurs
+   */
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
       throws ServletException, IOException {
