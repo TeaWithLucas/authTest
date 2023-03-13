@@ -42,9 +42,9 @@ public class JwtConfig {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
-   Returns the JWT secret key.
-   
-   @return the JWT secret key
+   Creates a HMAC SHA key based on the JWT secret.
+
+   @return the HMAC SHA key used for signing and verifying JWT tokens.
    */
   @Bean
   public Key jwtKey() {
@@ -52,10 +52,10 @@ public class JwtConfig {
   }
 
   /**
-   Returns the JWT builder.
+   Creates a JWT builder with the specified key and signature algorithm.
 
-   @param jwtKey the JWT secret key
-   @return the JWT builder
+   @param jwtKey the key used for signing JWT tokens.
+   @return the JWT builder instance.
    */
   @Bean
   public JwtBuilder jwtBuilder(Key jwtKey) {
@@ -65,10 +65,10 @@ public class JwtConfig {
   }
 
   /**
-   Returns the JWT parser.
+   Creates a JWT parser with the specified key and object mapper.
 
-   @param jwtKey the JWT secret key
-   @return the JWT parser
+   @param jwtKey the key used for verifying JWT tokens.
+   @return the JWT parser instance.
    */
   @Bean
   public JwtParser jwtParser(Key jwtKey) {
@@ -79,9 +79,9 @@ public class JwtConfig {
   }
 
   /**
-   Returns the service bearer token resolver.
+   Creates a bearer token resolver for service authorizations using the configured header name.
 
-   @return the service bearer token resolver
+   @return the bearer token resolver instance for service authorizations.
    */
   @Bean("serviceBearerTokenResolver")
   public DefaultBearerTokenResolver serviceBearerTokenResolver() {
@@ -91,9 +91,9 @@ public class JwtConfig {
   }
 
   /**
-   Returns the user bearer token resolver.
-
-   @return the user bearer token resolver
+   Creates a bearer token resolver for user authorizations using the configured header name.
+   
+   @return the bearer token resolver instance for user authorizations.
    */
   @Bean("userBearerTokenResolver")
   public DefaultBearerTokenResolver userBearerTokenResolver() {
